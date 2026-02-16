@@ -1,0 +1,34 @@
+{
+  "xapp_name": "security-test-xapp",
+  "version": "1.0.0",
+  "platform_api_url": "https://service-ricplt-appmgr-http.ricplt:8080/api",
+  "oauth_token_url": "https://service-ricplt-appmgr-http.ricplt:8080/oauth/token",
+  "rmr_port": 4560,
+  "rmr_wait_for_ready": true,
+  "xapp_id": "",
+  "xapp_secret": "",
+  "test_config": {
+    "a1_policy_max_rate": 10,
+    "connection_timeout": 30,
+    "max_retry_attempts": 3,
+    "enable_authentication_tests": true,
+    "enable_authorization_tests": true,
+    "enable_data_validation_tests": true,
+    "enable_rate_limit_tests": true,
+    "enable_logging_tests": true
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "/tmp/security-xapp.log"
+  },
+  "certificates": {
+    "cert_file": "/opt/certs/xapp-cert.pem",
+    "key_file": "/opt/certs/xapp-key.pem",
+    "ca_file": "/opt/certs/ca-cert.pem"
+  },
+  "rmr": {
+    "seed_rt": "/opt/route/local.rt",
+    "rtg_svc": "service-ricplt-rtmgr-rmr.ricplt:4561"
+  }
+}

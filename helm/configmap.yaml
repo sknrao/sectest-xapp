@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: security-test-xapp-config
+  namespace: ricxapp
+data:
+  config-file.json: |
+    {
+      "xapp_name": "security-test-xapp",
+      "version": "1.0.0",
+      "platform_api_url": "https://service-ricplt-appmgr-http.ricplt:8080/api",
+      "oauth_token_url": "https://service-ricplt-appmgr-http.ricplt:8080/oauth/token",
+      "rmr_port": 4560,
+      "test_config": {
+        "a1_policy_max_rate": 10,
+        "connection_timeout": 30,
+        "max_retry_attempts": 3
+      },
+      "logging": {
+        "level": "INFO",
+        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: security-xapp-routes
+  namespace: ricxapp
+data:
+  local.rt: |
+    newrt|start
+    rte|60000|service-ricplt-appmgr-rmr.ricplt:4560
+    rte|60001|security-test-xapp.ricxapp:4560
+    newrt|end

@@ -1,0 +1,146 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: security-test-xapp
+  namespace: ricxapp
+  labels:
+    app: security-test-xapp
+    version: v1.0.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: security-test-xapp
+  template:
+    metadata:
+      labels:
+        app: security-test-xapp
+        version: v1.0.0
+    spec:
+      serviceAccountName: security-test-xapp-sa
+      containers:
+      - name: security-test-xapp
+        image: <your-registry>/security-test-xapp:1.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: rmr-data
+          containerPort: 4560
+          protocol: TCP
+        - name: rmr-route
+          containerPort: 4561
+          protocol: TCP
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: RMR_SEED_RT
+          value: "/opt/route/local.rt"
+        - name: RMR_RTG_SVC
+          value: "service-ricplt-rtmgr-rmr.ricplt:4561"
+        - name: CONFIG_FILE
+          value: "/opt/config/config-file.json"
+        - name: XAPP_ID
+          valueFrom:
+            secretKeyRef:
+              name: security-xapp-credentials
+              key: xapp-id
+        - name: XAPP_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: security-xapp-credentials
+              key: xapp-secret
+        volumeMounts:
+        - name: config-volume
+          mountPath: /opt/config
+        - name: cert-volume
+          mountPath: /opt/certs
+          readOnly: true
+        - name: route-volume
+          mountPath: /opt/route
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      volumes:
+      - name: config-volume
+        configMap:
+          name: security-test-xapp-config
+      - name: cert-volume
+        secret:
+          secretName: security-xapp-certificates
+      - name: route-volume
+        configMap:
+          name: security-xapp-routes
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: security-test-xapp
+  namespace: ricxapp
+  labels:
+    app: security-test-xapp
+spec:
+  type: ClusterIP
+  selector:
+    app: security-test-xapp
+  ports:
+  - name: rmr-data
+    port: 4560
+    targetPort: 4560
+    protocol: TCP
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: security-test-xapp-sa
+  namespace: ricxapp
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: security-test-xapp-role
+  namespace: ricxapp
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: security-test-xapp-rolebinding
+  namespace: ricxapp
+subjects:
+- kind: ServiceAccount
+  name: security-test-xapp-sa
+  namespace: ricxapp
+roleRef:
+  kind: Role
+  name: security-test-xapp-role
+  apiGroup: rbac.authorization.k8s.io

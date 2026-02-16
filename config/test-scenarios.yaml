@@ -1,0 +1,124 @@
+# Security Test Scenarios for O-RAN Near-RT RIC
+# Defines different test execution profiles
+
+scenarios:
+  - name: "full_compliance_test"
+    description: "Complete O-RAN WG11 Chapter 5.1.3 compliance testing"
+    duration_estimate: "45-60 minutes"
+    tests:
+      - authentication
+      - authorization
+      - data_validation
+      - rate_limiting
+      - logging
+    severity: "comprehensive"
+    
+  - name: "quick_smoke_test"
+    description: "Basic security health check"
+    duration_estimate: "5-10 minutes"
+    tests:
+      - authentication
+      - authorization
+    severity: "basic"
+    
+  - name: "ddos_resilience_test"
+    description: "Focus on DDoS protection and recovery (REQ-SEC-NEAR-RT-6)"
+    duration_estimate: "20-30 minutes"
+    tests:
+      - rate_limiting
+    severity: "specialized"
+    
+  - name: "api_security_test"
+    description: "Test API authentication and authorization mechanisms"
+    duration_estimate: "15-20 minutes"
+    tests:
+      - authentication
+      - authorization
+    severity: "focused"
+    
+  - name: "injection_attack_test"
+    description: "Test protection against injection attacks (REQ-SEC-NEAR-RT-7,8,9)"
+    duration_estimate: "15-20 minutes"
+    tests:
+      - data_validation
+    severity: "specialized"
+    
+  - name: "audit_compliance_test"
+    description: "Test security logging and audit trail (SEC-CTL-NEAR-RT-8,16,17,18)"
+    duration_estimate: "10-15 minutes"
+    tests:
+      - logging
+    severity: "focused"
+
+# Test categories and their O-RAN specification mappings
+test_categories:
+  authentication:
+    description: "Tests for SEC-CTL-NEAR-RT-1, 2, 2A, 9, 12, 13, 14"
+    controls:
+      - "SEC-CTL-NEAR-RT-1: mTLS for REST/gRPC APIs"
+      - "SEC-CTL-NEAR-RT-2: IPsec for time-critical APIs"
+      - "SEC-CTL-NEAR-RT-2A: mTLS for A1 interface"
+      - "SEC-CTL-NEAR-RT-9: mTLS for Y1 interface"
+      - "SEC-CTL-NEAR-RT-12: xApp ID in X.509 certificate"
+      - "SEC-CTL-NEAR-RT-13: UUID v4 format for xApp ID"
+      - "SEC-CTL-NEAR-RT-14: subjectAltName URI-ID"
+    
+  authorization:
+    description: "Tests for SEC-CTL-NEAR-RT-3, 3A, 3B, 3C, 4, 5, 10"
+    controls:
+      - "SEC-CTL-NEAR-RT-3: OAuth 2.0 framework"
+      - "SEC-CTL-NEAR-RT-3A: Platform service authorization"
+      - "SEC-CTL-NEAR-RT-3B: Least privilege enforcement"
+      - "SEC-CTL-NEAR-RT-3C: API discovery restrictions"
+      - "SEC-CTL-NEAR-RT-4: OAuth resource server (A1-P)"
+      - "SEC-CTL-NEAR-RT-5: OAuth client (A1-EI)"
+      - "SEC-CTL-NEAR-RT-10: Y1 OAuth authorization"
+    
+  data_validation:
+    description: "Tests for SEC-CTL-NEAR-RT-8, 15, 17, 18"
+    controls:
+      - "SEC-CTL-NEAR-RT-8: A1 policy validation"
+      - "SEC-CTL-NEAR-RT-15: Y1 data validation"
+      - "SEC-CTL-NEAR-RT-16: Y1 validation logging"
+      - "SEC-CTL-NEAR-RT-17: E2 data validation"
+      - "SEC-CTL-NEAR-RT-18: xApp→Platform data validation"
+      - "REQ-SEC-NEAR-RT-7: Content attack protection (A1)"
+      - "REQ-SEC-NEAR-RT-8: Content attack protection (Y1)"
+      - "REQ-SEC-NEAR-RT-9: Content attack protection (E2)"
+    
+  rate_limiting:
+    description: "Tests for REQ-SEC-NEAR-RT-6, 7, 8, 9"
+    controls:
+      - "REQ-SEC-NEAR-RT-6: Volumetric DDoS recovery (A1)"
+      - "REQ-SEC-NEAR-RT-7: Content-related attack defense (A1)"
+      - "REQ-SEC-NEAR-RT-8: Content-related attack defense (Y1)"
+      - "REQ-SEC-NEAR-RT-9: Content-related attack defense (E2)"
+    
+  logging:
+    description: "Tests for SEC-CTL-NEAR-RT-8, 16, 17, 18 logging requirements"
+    controls:
+      - "SEC-CTL-NEAR-RT-8: A1 validation failure logging"
+      - "SEC-CTL-NEAR-RT-16: Y1 validation failure logging"
+      - "SEC-CTL-NEAR-RT-17: E2 validation failure logging"
+      - "SEC-CTL-NEAR-RT-18: xApp data validation failure logging"
+
+# Execution parameters
+execution:
+  parallel_tests: false
+  stop_on_first_failure: false
+  generate_report: true
+  report_format: "json"
+  save_detailed_logs: true
+  
+# Pass/Fail thresholds
+thresholds:
+  authentication:
+    min_pass_rate: 100  # Must be 100% for authentication
+  authorization:
+    min_pass_rate: 80   # 80% or higher
+  data_validation:
+    min_pass_rate: 90   # 90% or higher
+  rate_limiting:
+    min_pass_rate: 70   # 70% or higher (DDoS is complex)
+  logging:
+    min_pass_rate: 80   # 80% or higher

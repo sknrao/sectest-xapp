@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Security Test xApp Configuration Schema",
+  "type": "object",
+  "properties": {
+    "xapp_name": {
+      "type": "string",
+      "description": "Name of the xApp"
+    },
+    "version": {
+      "type": "string",
+      "description": "Version of the xApp",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "platform_api_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Near-RT RIC Platform API URL"
+    },
+    "oauth_token_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "OAuth 2.0 token endpoint URL"
+    },
+    "rmr_port": {
+      "type": "integer",
+      "minimum": 1024,
+      "maximum": 65535,
+      "description": "RMR data port"
+    },
+    "rmr_wait_for_ready": {
+      "type": "boolean",
+      "description": "Wait for RMR to be ready before starting"
+    },
+    "xapp_id": {
+      "type": "string",
+      "description": "xApp unique identifier (UUID)"
+    },
+    "xapp_secret": {
+      "type": "string",
+      "description": "xApp secret for OAuth authentication"
+    },
+    "test_config": {
+      "type": "object",
+      "properties": {
+        "a1_policy_max_rate": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum A1 policy rate (policies per second)"
+        },
+        "connection_timeout": {
+          "type": "integer",
+          "minimum": 5,
+          "description": "Connection timeout in seconds"
+        },
+        "max_retry_attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum retry attempts for failed operations"
+        },
+        "enable_authentication_tests": {
+          "type": "boolean",
+          "description": "Enable authentication security tests"
+        },
+        "enable_authorization_tests": {
+          "type": "boolean",
+          "description": "Enable authorization security tests"
+        },
+        "enable_data_validation_tests": {
+          "type": "boolean",
+          "description": "Enable data validation security tests"
+        },
+        "enable_rate_limit_tests": {
+          "type": "boolean",
+          "description": "Enable rate limiting security tests"
+        },
+        "enable_logging_tests": {
+          "type": "boolean",
+          "description": "Enable security logging tests"
+        }
+      },
+      "required": ["a1_policy_max_rate", "connection_timeout", "max_retry_attempts"]
+    },
+    "logging": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+          "description": "Logging level"
+        },
+        "format": {
+          "type": "string",
+          "description": "Log message format"
+        },
+        "file": {
+          "type": "string",
+          "description": "Log file path"
+        }
+      },
+      "required": ["level"]
+    },
+    "certificates": {
+      "type": "object",
+      "properties": {
+        "cert_file": {
+          "type": "string",
+          "description": "Path to xApp certificate file"
+        },
+        "key_file": {
+          "type": "string",
+          "description": "Path to xApp private key file"
+        },
+        "ca_file": {
+          "type": "string",
+          "description": "Path to CA certificate file"
+        }
+      },
+      "required": ["cert_file", "key_file", "ca_file"]
+    },
+    "rmr": {
+      "type": "object",
+      "properties": {
+        "seed_rt": {
+          "type": "string",
+          "description": "Path to RMR seed routing table"
+        },
+        "rtg_svc": {
+          "type": "string",
+          "description": "RMR routing table generator service"
+        }
+      }
+    }
+  },
+  "required": [
+    "xapp_name",
+    "version",
+    "platform_api_url",
+    "rmr_port",
+    "test_config",
+    "certificates"
+  ]
+}

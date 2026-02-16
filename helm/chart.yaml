@@ -1,0 +1,15 @@
+apiVersion: v2
+name: security-test-xapp
+description: O-RAN Security Compliance Testing xApp
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - oran
+  - xapp
+  - security
+  - compliance
+  - testing
+maintainers:
+  - name: Security Team
+    email: security@example.com
