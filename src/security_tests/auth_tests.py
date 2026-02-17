@@ -24,6 +24,7 @@ class AuthenticationTester:
     
     def __init__(self, xapp):
         self.xapp = xapp
+        self.config_helper = xapp.config_helper  # Use config helper
         self.results = {}
     
     def run_tests(self):
@@ -58,19 +59,16 @@ class AuthenticationTester:
         
         try:
             # Get platform API endpoint
-            api_url = self.xapp.config.get('platform_api_url', 'https://localhost:8080/api')
-            
-            # Load xApp certificate and key
-            cert_file = '/opt/certs/xapp-cert.pem'
-            key_file = '/opt/certs/xapp-key.pem'
-            ca_file = '/opt/certs/ca-cert.pem'
+            # NEW WAY (configurable):
+            api_url = self.config_helper.get_url('health')
+            cert_tuple = self.config_helper.get_cert_tuple()
             
             # Attempt mTLS connection
             response = requests.get(
-                f"{api_url}/health",
-                cert=(cert_file, key_file),
-                verify=ca_file,
-                timeout=5
+                api_url,
+                cert=cert_tuple,
+                verify=self.config_helper.ca_file,
+                timeout=self.config_helper.timeout
             )
             
             if response.status_code == 200:

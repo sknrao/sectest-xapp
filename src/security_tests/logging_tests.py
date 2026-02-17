@@ -22,6 +22,7 @@ class LoggingTester:
     
     def __init__(self, xapp):
         self.xapp = xapp
+        self.config_helper = xapp.config_helper
         self.results = {}
     
     def run_tests(self):
@@ -56,7 +57,9 @@ class LoggingTester:
                 self.results[test_name] = {'status': 'SKIP', 'message': 'No token available'}
                 return
             
-            api_url = self.xapp.config.get('platform_api_url', 'https://localhost:8080/api')
+            #api_url = self.xapp.config.get('platform_api_url', 'https://localhost:8080/api')
+            api_url = self.config_helper.get_url('health')
+            cert_tuple = self.config_helper.get_cert_tuple()
             
             # Trigger various security events
             security_events = []
@@ -64,11 +67,11 @@ class LoggingTester:
             # Event 1: Invalid authentication
             try:
                 resp = requests.get(
-                    f"{api_url}/health",
+                    api_url,
                     headers={'Authorization': 'Bearer invalid-token'},
-                    cert=('/opt/certs/xapp-cert.pem', '/opt/certs/xapp-key.pem'),
-                    verify='/opt/certs/ca-cert.pem',
-                    timeout=5
+                    cert=cert_tuple,
+                    verify=self.config_helper.ca_file,
+                    timeout=self.config_helper.timeout
                 )
                 security_events.append(('auth_failure', resp.status_code))
             except:

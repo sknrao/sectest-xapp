@@ -23,6 +23,7 @@ class RateLimitTester:
     
     def __init__(self, xapp):
         self.xapp = xapp
+        self.config_helper = xapp.config_helper
         self.results = {}
     
     def run_tests(self):
@@ -63,8 +64,9 @@ class RateLimitTester:
                 self.results[test_name] = {'status': 'SKIP', 'message': 'No token available'}
                 return
             
-            api_url = self.xapp.config.get('platform_api_url', 'https://localhost:8080/api')
-            
+            #api_url = self.xapp.config.get('platform_api_url', 'https://localhost:8080/api')
+            api_url = self.config_helper.get_url('a1_policytypes')
+            cert_tuple = self.config_helper.get_cert_tuple()
             # Simulate DDoS: Send massive number of requests
             ddos_request_count = 1000
             concurrent_threads = 50
@@ -78,11 +80,11 @@ class RateLimitTester:
             def send_request(req_id):
                 try:
                     response = requests.get(
-                        f"{api_url}/a1-p/policytypes",
+                        api_url,
                         headers={'Authorization': f'Bearer {self.xapp.oauth_token}'},
-                        cert=('/opt/certs/xapp-cert.pem', '/opt/certs/xapp-key.pem'),
-                        verify='/opt/certs/ca-cert.pem',
-                        timeout=5
+                        cert=cert_tuple,
+                        verify=self.config_helper.ca_file,
+                        timeout=self.config_helper.timeout
                     )
                     
                     if response.status_code == 200:

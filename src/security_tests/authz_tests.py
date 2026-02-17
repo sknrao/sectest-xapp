@@ -23,6 +23,7 @@ class AuthorizationTester:
     
     def __init__(self, xapp):
         self.xapp = xapp
+        self.config_helper = xapp.config_helper
         self.results = {}
     
     def run_tests(self):
@@ -59,21 +60,25 @@ class AuthorizationTester:
         test_name = "oauth_token_flow"
         
         try:
-            # OAuth token endpoint
-            token_url = self.xapp.config.get('oauth_token_url', 'https://localhost:8080/oauth/token')
+             # NEW WAY (configurable):
+            token_url = self.config_helper.get_url('oauth_token')
             
-            # Request token using client credentials grant
+            # Get credentials
+            xapp_id = self.xapp.config.get('xapp_identity', {}).get('xapp_id')
+            xapp_secret = self.xapp.config.get('xapp_identity', {}).get('xapp_secret')
+            
+            # Request token
             response = requests.post(
                 token_url,
                 data={
                     'grant_type': 'client_credentials',
-                    'client_id': self.xapp.config.get('xapp_id'),
-                    'client_secret': self.xapp.config.get('xapp_secret'),
+                    'client_id': xapp_id,
+                    'client_secret': xapp_secret,
                     'scope': 'platform:read platform:write'
                 },
-                cert=('/opt/certs/xapp-cert.pem', '/opt/certs/xapp-key.pem'),
-                verify='/opt/certs/ca-cert.pem',
-                timeout=10
+                cert=self.config_helper.get_cert_tuple(),
+                verify=self.config_helper.ca_file,
+                timeout=self.config_helper.timeout
             )
             
             if response.status_code == 200:
